@@ -1,5 +1,7 @@
 #include "game.h"
+#include "logger.h"
 #include <iostream>
+#include <future>
 #include "SDL.h"
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
@@ -10,7 +12,7 @@ Game::Game(std::size_t grid_width, std::size_t grid_height)
   PlaceFood();
 }
 
-void Game::Run(Controller const &controller, Renderer &renderer,
+void Game::Run(Controller &controller, Renderer &renderer,
                std::size_t target_frame_duration) {
   Uint32 title_timestamp = SDL_GetTicks();
   Uint32 frame_start;
@@ -23,8 +25,14 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     frame_start = SDL_GetTicks();
 
     // Input, Update, Render - the main game loop.
-    controller.HandleInput(running, snake);
-    Update();
+    bool restart = controller.HandleInput(running, snake);
+    if (restart) {
+      Restart();
+    }
+    if (snake.alive) {
+      Update();
+      if (!snake.alive) CheckAndLogScore(); // if snake died this step
+    }
     renderer.Render(snake, food);
 
     frame_end = SDL_GetTicks();
@@ -66,8 +74,6 @@ void Game::PlaceFood() {
 }
 
 void Game::Update() {
-  if (!snake.alive) return;
-
   snake.Update();
 
   int new_x = static_cast<int>(snake.head_x);
@@ -81,6 +87,17 @@ void Game::Update() {
     snake.GrowBody();
     snake.speed += 0.02;
   }
+}
+
+void Game::Restart() {
+  score = 0;
+  snake.Initialize();
+  PlaceFood();
+}
+
+void Game::CheckAndLogScore() {
+  Logger hsLogger;
+  std::async(&Logger::UpdateHighScore, &hsLogger, score);
 }
 
 int Game::GetScore() const { return score; }

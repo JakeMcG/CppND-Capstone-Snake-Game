@@ -2,10 +2,12 @@
 #include <iostream>
 #include <string>
 
-Renderer::Renderer(const std::size_t screen_width,
+Renderer::Renderer(std::shared_ptr<ThemeManager> _themeMgr,
+                   const std::size_t screen_width,
                    const std::size_t screen_height,
                    const std::size_t grid_width, const std::size_t grid_height)
-    : screen_width(screen_width),
+    : themeMgr(_themeMgr),
+      screen_width(screen_width),
       screen_height(screen_height),
       grid_width(grid_width),
       grid_height(grid_height) {
@@ -43,18 +45,20 @@ void Renderer::Render(Snake const snake, SDL_Point const &food) {
   block.w = screen_width / grid_width;
   block.h = screen_height / grid_height;
 
+  Theme currTheme = themeMgr->CurrentTheme();
+
   // Clear screen
-  SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
+  currTheme.background.SetRendererToDraw(sdl_renderer);
   SDL_RenderClear(sdl_renderer);
 
   // Render food
-  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xCC, 0x00, 0xFF);
+  currTheme.food.SetRendererToDraw(sdl_renderer);
   block.x = food.x * block.w;
   block.y = food.y * block.h;
   SDL_RenderFillRect(sdl_renderer, &block);
 
   // Render snake's body
-  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+  currTheme.body.SetRendererToDraw(sdl_renderer);
   for (SDL_Point const &point : snake.body) {
     block.x = point.x * block.w;
     block.y = point.y * block.h;
@@ -64,11 +68,11 @@ void Renderer::Render(Snake const snake, SDL_Point const &food) {
   // Render snake's head
   block.x = static_cast<int>(snake.head_x) * block.w;
   block.y = static_cast<int>(snake.head_y) * block.h;
-  if (snake.alive) {
-    SDL_SetRenderDrawColor(sdl_renderer, 0x00, 0x7A, 0xCC, 0xFF);
-  } else {
-    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
+  Color headColor = currTheme.head;
+  if (!snake.alive) {
+    headColor = currTheme.dead;
   }
+  headColor.SetRendererToDraw(sdl_renderer);
   SDL_RenderFillRect(sdl_renderer, &block);
 
   // Update Screen

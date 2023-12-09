@@ -1,7 +1,9 @@
 #include <iostream>
+#include <memory>
 #include "controller.h"
 #include "game.h"
 #include "renderer.h"
+#include "theme.h"
 
 int main() {
   constexpr std::size_t kFramesPerSecond{60};
@@ -11,8 +13,9 @@ int main() {
   constexpr std::size_t kGridWidth{32};
   constexpr std::size_t kGridHeight{32};
 
-  Renderer renderer(kScreenWidth, kScreenHeight, kGridWidth, kGridHeight);
-  Controller controller;
+  auto themeMgr = std::make_shared<ThemeManager>(); 
+  Renderer renderer(themeMgr, kScreenWidth, kScreenHeight, kGridWidth, kGridHeight);
+  Controller controller(std::move(themeMgr)); // move because we don't need themeMgr here anymore
   Game game(kGridWidth, kGridHeight);
   game.Run(controller, renderer, kMsPerFrame);
   std::cout << "Game has terminated successfully!\n";

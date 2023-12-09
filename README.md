@@ -1,12 +1,43 @@
-# CPPND: Capstone Snake Game Example
+# CPPND: Capstone Snake Game
 
-This is a starter repo for the Capstone project in the [Udacity C++ Nanodegree Program](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213). The code for this repo was inspired by [this](https://codereview.stackexchange.com/questions/212296/snake-game-in-c-with-sdl) excellent StackOverflow post and set of responses.
+Capstone Project submission for the [Udacity C++ Nanodegree Program](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213).
 
 <img src="snake_game.gif"/>
 
-The Capstone Project gives you a chance to integrate what you've learned throughout this program. This project will become an important part of your portfolio to share with current and future colleagues and employers.
+## Building and Running
 
-In this project, you can build your own C++ application or extend this Snake game, following the principles you have learned throughout this Nanodegree Program. This project will demonstrate that you can independently create applications using a wide range of C++ features.
+The build and run instructions are unchanged:
+- `mkdir build && cd build`
+- `cmake .. && make`
+- `./SnakeGame`.
+
+## Capstone Project Additions
+
+Three main features were added to the game:
+
+1. **High Score.** The players high score is stored to a text file. After each game the file is updated if the previous high score was beat.
+2. **Replay.** When your snake dies, press the spacebar to immediately start a new game.
+3. **Themes.** Feeling colorful? At any time, press tab to toggle the game's color scheme. Although only two themes are implemented (default and "grassy"), the implementation allows for cycling between any number of themes.
+
+## Rubric Components
+
+### Loops, Functions, I/O
+- Storing and updating high score requires reading and writing to an external file.
+- Toggling the color scheme requires accepting new user input.
+
+### Object Oriented Programming
+- Several new classes were added. `Logger` manages high score updating. `ThemeManager` manages color scheme toggling. A color scheme is defined by a `Theme` object which itself is composed of `Color`s.
+- `Theme` and `Color` use member initialization lists.
+- `Color::SetRendererToDraw` abstracts the assignment of the RGBA color to the SDL renderer out of the `renderer.cpp` body. This declutters the `Renderer::Render` method significantly, especially with the addition of `Theme`s and `Color`s.
+
+### Memory Management
+- `Logger` takes ownership of the underlying text file with a `std::fstream` upon construction, and closes the file in its destructor.
+- A smart pointer (`shared_ptr`) is used to share ownership of the `ThemeManager` between the `Controller` and `Renderer` objects. The former toggles the currently selected color scheme, while the latter pulls the current color scheme to render objects accordingly.
+- The `ThemeManager` smart pointer is *moved* into the `Controller` after being copied into `Renderer`, so that there is no lasting ownership in `main.cpp`.
+
+### Concurrency
+- Updating the high score is done in a separate task using `std::async`.
+- Reading from and writing to the high score file is protected using a mutex and `lock_guard`.
 
 ## Dependencies for Running Locally
 * cmake >= 3.7
@@ -23,16 +54,7 @@ In this project, you can build your own C++ application or extend this Snake gam
   * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
   * Windows: recommend using [MinGW](http://www.mingw.org/)
 
-## Basic Build Instructions
-
-1. Clone this repo.
-2. Make a build directory in the top level directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./SnakeGame`.
-
-
 ## CC Attribution-ShareAlike 4.0 International
-
 
 Shield: [![CC BY-SA 4.0][cc-by-sa-shield]][cc-by-sa]
 

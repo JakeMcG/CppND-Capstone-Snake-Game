@@ -9,8 +9,9 @@ void Controller::ChangeDirection(Snake &snake, Snake::Direction input,
   return;
 }
 
-void Controller::HandleInput(bool &running, Snake &snake) const {
+bool Controller::HandleInput(bool &running, Snake &snake) {
   SDL_Event e;
+  bool restart = false;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {
       running = false;
@@ -35,7 +36,16 @@ void Controller::HandleInput(bool &running, Snake &snake) const {
           ChangeDirection(snake, Snake::Direction::kRight,
                           Snake::Direction::kLeft);
           break;
+
+        case SDLK_SPACE:
+          if (!snake.alive) restart = true;
+          break;
+
+        case SDLK_TAB:
+          themeMgr->ToggleTheme();
+          break;
       }
     }
   }
+  return restart;
 }

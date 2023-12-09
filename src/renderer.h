@@ -2,12 +2,15 @@
 #define RENDERER_H
 
 #include <vector>
+#include <memory>
 #include "SDL.h"
 #include "snake.h"
+#include "theme.h"
 
 class Renderer {
  public:
-  Renderer(const std::size_t screen_width, const std::size_t screen_height,
+  Renderer(std::shared_ptr<ThemeManager> _themeMgr, 
+           const std::size_t screen_width, const std::size_t screen_height,
            const std::size_t grid_width, const std::size_t grid_height);
   ~Renderer();
 
@@ -17,6 +20,8 @@ class Renderer {
  private:
   SDL_Window *sdl_window;
   SDL_Renderer *sdl_renderer;
+
+  std::shared_ptr<ThemeManager> themeMgr;
 
   const std::size_t screen_width;
   const std::size_t screen_height;

@@ -2,6 +2,12 @@
 #include <cmath>
 #include <iostream>
 
+Snake::Snake(int grid_width, int grid_height) 
+      : grid_width(grid_width),
+        grid_height(grid_height) {
+  Initialize();
+}
+
 void Snake::Update() {
   SDL_Point prev_cell{
       static_cast<int>(head_x),
@@ -76,4 +82,13 @@ bool Snake::SnakeCell(int x, int y) {
     }
   }
   return false;
+}
+
+void Snake::Initialize() {
+  head_x = grid_width/2;
+  head_y = grid_width/2;
+  speed = 0.1;
+  size = 1;
+  alive = true;
+  body.clear();
 }
